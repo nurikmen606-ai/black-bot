@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLACK — Защита от мошенников</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #FF1744;
+    --red2: #D50000;
+    --gold: #FFD700;
+    --bg: #050507;
+    --surface: #0D0D12;
+    --surface2: #141420;
+    --border: #1E1E2E;
+    --muted: #4A4A6A;
+    --white: #E8E8F5;
+    --safe: #00E676;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    background: rgba(5,5,7,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 8px;
+    color: var(--white);
+  }
+  .logo span { color: var(--red); }
+
+  .nav-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,230,118,0.1);
+    border: 1px solid rgba(0,230,118,0.3);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--safe);
+    letter-spacing: 1px;
+  }
+
+  .dot { width: 8px; height: 8px; background: var(--safe); border-radius: 50%; animation: pulse 1.5s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 20px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,23,68,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,23,68,0.1);
+    border: 1px solid rgba(255,23,68,0.3);
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--red);
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 18vw, 200px);
+    letter-spacing: 20px;
+    line-height: 0.9;
+    color: var(--white);
+    animation: fadeUp 0.8s ease 0.2s both;
+    position: relative;
+  }
+
+  .hero-title .a { color: var(--red); text-shadow: 0 0 60px rgba(255,23,68,0.5); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-sub {
+    font-size: clamp(14px, 2.5vw, 20px);
+    color: var(--muted);
+    letter-spacing: 4px;
+    font-weight: 700;
+    margin-top: 16px;
+    animation: fadeUp 0.8s ease 0.4s both;
+  }
+
+  .hero-desc {
+    max-width: 520px;
+    font-size: 15px;
+    color: rgba(232,232,245,0.6);
+    line-height: 1.7;
+    margin-top: 24px;
+    animation: fadeUp 0.8s ease 0.5s both;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin: 40px 0;
+    animation: fadeUp 0.8s ease 0.6s both;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 2px;
+  }
+
+  .stat-num.r { color: var(--red); }
+  .stat-num.g { color: var(--safe); }
+  .stat-num.w { color: var(--gold); }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.8s ease 0.7s both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--red), var(--red2));
+    color: white;
+    text-decoration: none;
+    padding: 18px 36px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow: 0 10px 40px rgba(255,23,68,0.35);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 60px rgba(255,23,68,0.5);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    color: var(--white);
+    text-decoration: none;
+    padding: 18px 36px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--red);
+    color: var(--red);
+    transform: translateY(-3px);
+  }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden;
+    background: var(--red);
+    padding: 12px 0;
+    margin: 60px 0 0;
+  }
+
+  .marquee {
+    display: flex;
+    gap: 60px;
+    animation: marquee 20s linear infinite;
+    white-space: nowrap;
+  }
+
+  .marquee span {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: white;
+    text-transform: uppercase;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* FEATURES */
+  .section {
+    padding: 100px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--red);
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    letter-spacing: 4px;
+    line-height: 1;
+    margin-bottom: 60px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .feature-card:hover {
+    border-color: rgba(255,23,68,0.3);
+    transform: translateY(-4px);
+  }
+
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-icon { font-size: 36px; margin-bottom: 16px; }
+
+  .feature-title {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--white);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .feature-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* HOW IT WORKS */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 600px;
+  }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    transition: all 0.3s;
+  }
+
+  .step:hover { border-color: rgba(255,23,68,0.3); }
+
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    color: var(--red);
+    line-height: 1;
+    min-width: 40px;
+  }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .step-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* PRO SECTION */
+  .pro-section {
+    padding: 100px 40px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pro-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .pro-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    color: var(--gold);
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+
+  .pro-price span {
+    font-size: 30px;
+    color: var(--muted);
+  }
+
+  .pro-features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  .pro-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--white);
+    font-weight: 700;
+  }
+
+  .pro-feature::before {
+    content: '✓';
+    color: var(--gold);
+    font-weight: 900;
+    font-size: 16px;
+  }
+
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--gold), #FFB300);
+    color: #000;
+    text-decoration: none;
+    padding: 18px 36px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow: 0 10px 40px rgba(255,215,0,0.3);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-gold:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 60px rgba(255,215,0,0.5);
+  }
+
+  /* DOWNLOAD */
+  .download-section {
+    padding: 100px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .download-section::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px; height: 400px;
+    background: radial-gradient(ellipse, rgba(255,23,68,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .download-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 8vw, 90px);
+    letter-spacing: 6px;
+    margin-bottom: 16px;
+  }
+
+  .download-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 40px;
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 8px;
+    margin-bottom: 12px;
+  }
+
+  .footer-logo span { color: var(--red); }
+
+  .footer-text {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* PHONE MOCKUP */
+  .phone-mockup {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 40px;
+    padding: 20px;
+    max-width: 260px;
+    margin: 0 auto;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,23,68,0.1);
+    position: relative;
+  }
+
+  .phone-screen {
+    background: var(--bg);
+    border-radius: 28px;
+    padding: 20px 16px;
+    overflow: hidden;
+  }
+
+  .phone-header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .phone-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 5px;
+  }
+
+  .phone-title span { color: var(--red); }
+
+  .phone-check {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .phone-input {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .phone-num {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--white);
+  }
+
+  .phone-result {
+    background: rgba(255,23,68,0.1);
+    border: 1px solid rgba(255,23,68,0.3);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 900;
+    text-align: center;
+  }
+
+  .phone-safe {
+    background: rgba(0,230,118,0.1);
+    border: 1px solid rgba(0,230,118,0.3);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 11px;
+    color: var(--safe);
+    font-weight: 900;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .section { padding: 60px 20px; }
+    .pro-inner { grid-template-columns: 1fr; gap: 40px; }
+    .hero-stats { gap: 24px; }
+    .download-section { padding: 60px 20px; }
+    .pro-section { padding: 60px 20px; }
+    footer { padding: 30px 20px; }
+  }
+
+  /* SCROLL ANIMATIONS */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">BL<span>A</span>CK</div>
+  <div class="nav-badge">
+    <div class="dot"></div>
+    ЗАЩИТА ОНЛАЙН
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🛡️ &nbsp; ПРИЛОЖЕНИЕ №1 ДЛЯ КАЗАХСТАНЦЕВ</div>
+  <h1 class="hero-title">BL<span class="a">A</span>CK</h1>
+  <p class="hero-sub">Уничтожь мошенников</p>
+  <p class="hero-desc">Проверяй номера телефонов в реальном времени. ИИ-ассистент определит мошенника за секунды.</p>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num r">4</div>
+      <div class="stat-label">Мошенников</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num w">554</div>
+      <div class="stat-label">Жалоб</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num g">1243</div>
+      <div class="stat-label">Юзеров</div>
+    </div>
+  </div>
+
+  <div class="hero-btns">
+    <a href="app-release.apk" class="btn-primary" download>
+      📱 Скачать для Android
+    </a>
+    <a href="https://t.me/Black_pro_kz_bot" class="btn-secondary" target="_blank">
+      ✈️ Telegram бот
+    </a>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee">
+    <span>🛡️ ЗАЩИТА ОТ МОШЕННИКОВ</span>
+    <span>•</span>
+    <span>🔍 ПРОВЕРКА НОМЕРОВ</span>
+    <span>•</span>
+    <span>🤖 ИИ АНАЛИЗ</span>
+    <span>•</span>
+    <span>🇰🇿 ДЛЯ КАЗАХСТАНА</span>
+    <span>•</span>
+    <span>⚡ BLACK PRO</span>
+    <span>•</span>
+    <span>🛡️ ЗАЩИТА ОТ МОШЕННИКОВ</span>
+    <span>•</span>
+    <span>🔍 ПРОВЕРКА НОМЕРОВ</span>
+    <span>•</span>
+    <span>🤖 ИИ АНАЛИЗ</span>
+    <span>•</span>
+    <span>🇰🇿 ДЛЯ КАЗАХСТАНА</span>
+    <span>•</span>
+    <span>⚡ BLACK PRO</span>
+    <span>•</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section reveal">
+  <p class="section-label">● ВОЗМОЖНОСТИ</p>
+  <h2 class="section-title">ЧТО УМЕЕТ BLACK</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">Проверка номеров</div>
+      <div class="feature-desc">Мгновенная проверка любого казахстанского номера по базе мошенников из полиции РК.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <div class="feature-title">ИИ-ассистент</div>
+      <div class="feature-desc">Опиши ситуацию — ИИ на базе Llama 3.3 70B определит мошенник или нет за секунды.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚨</div>
+      <div class="feature-title">База угроз</div>
+      <div class="feature-desc">Актуальная база мошенников с категориями: лже-банк, лже-полиция, лже-инвестиции.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Система жалоб</div>
+      <div class="feature-desc">Пожалуйся на мошенника — помоги защитить других казахстанцев от обмана.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔐</div>
+      <div class="feature-title">PIN защита</div>
+      <div class="feature-desc">Твои данные защищены PIN-кодом. Никто кроме тебя не войдёт в приложение.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🇰🇿</div>
+      <div class="feature-title">Сделано в Казахстане</div>
+      <div class="feature-desc">Создано казахстанским разработчиком специально для защиты казахстанцев.</div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section reveal">
+  <p class="section-label">● КАК РАБОТАЕТ</p>
+  <h2 class="section-title">3 ШАГА К ЗАЩИТЕ</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Скачай приложение</div>
+        <div class="step-desc">Скачай BLACK APK и установи на Android телефон. Бесплатно.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Введи номер</div>
+        <div class="step-desc">Получил подозрительный звонок? Введи номер в BLACK — и узнаешь правду за 1 секунду.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Будь защищён</div>
+        <div class="step-desc">Красный = мошенник, зелёный = чисто. Всё просто. Жалуйся и помогай другим.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRO -->
+<div class="pro-section">
+  <div class="pro-inner">
+    <div class="reveal">
+      <p class="section-label">● BLACK PRO</p>
+      <h2 class="section-title">ПОЛНАЯ<br>ЗАЩИТА</h2>
+      <div class="pro-price">990 <span>₸/мес</span></div>
+      <div class="pro-features">
+        <div class="pro-feature">ИИ-ассистент без лимитов</div>
+        <div class="pro-feature">Анализ звонков и SMS</div>
+        <div class="pro-feature">Мгновенная оценка угрозы</div>
+        <div class="pro-feature">Советы по защите</div>
+        <div class="pro-feature">Приоритетная поддержка</div>
+      </div>
+      <a href="https://t.me/Black_pro_kz_bot" class="btn-gold" target="_blank">
+        ⚡ Купить PRO в Telegram
+      </a>
+    </div>
+    <div class="reveal">
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-title">BL<span>A</span>CK</div>
+          </div>
+          <div class="phone-check">
+            <div class="phone-input">🔍 Проверить номер</div>
+            <div class="phone-num">+7 705 926 88 88</div>
+          </div>
+          <div class="phone-result">🚨 ОПАСНО! Лже-банк • 96% риск</div>
+          <div style="margin-top: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px;">
+            <div class="phone-input">🔍 Проверить номер</div>
+            <div class="phone-num">+7 701 234 56 78</div>
+          </div>
+          <div class="phone-safe">✅ НОМЕР ЧИСТЫЙ • 3% риск</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOWNLOAD -->
+<div class="download-section reveal">
+  <p class="section-label">● СКАЧАТЬ</p>
+  <h2 class="download-title">ЗАЩИТИСЬ<br>ПРЯМО СЕЙЧАС</h2>
+  <p class="download-sub">Бесплатно для Android • Установи APK</p>
+  <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+    <a href="app-release.apk" class="btn-primary" download>
+      📱 Скачать APK — Android
+    </a>
+    <a href="https://t.me/Black_pro_kz_bot" class="btn-secondary" target="_blank">
+      ✈️ @Black_pro_kz_bot
+    </a>
+  </div>
+  <p style="margin-top: 20px; font-size: 11px; color: var(--muted);">
+    Версия 1.5 • Казахстан • 2026
+  </p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">BL<span>A</span>CK</div>
+  <p class="footer-text">Защита казахстанцев от телефонных мошенников</p>
+  <p style="margin-top: 8px; font-size: 11px; color: var(--muted);">© 2026 BLACK App • Нұржайық Мұсапарқан • Астана, Казахстан</p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
